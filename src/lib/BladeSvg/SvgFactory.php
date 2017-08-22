@@ -87,7 +87,18 @@ class SvgFactory
     public function getSvg($name)
     {
         return $this->svgCache->get($name, function () use ($name) {
-            $path = sprintf('%s/%s.svg', rtrim($this->svgPath()), $name);
+            $path_raw = sprintf('%s/%s.svg', rtrim($this->svgPath()), $name);
+
+            $path_without_dist = str_replace('/dist/', '', $path_raw);
+            $path_sage = \App\sage('assets')->get($path_without_dist);
+
+            $svgpath_without_dist = str_replace('/dist/', '', $this->svgPath());
+            $name_sage = str_replace('.svg', '', 
+              str_replace($svgpath_without_dist . '/', '', $path_sage)
+            );
+
+            $path = get_template_directory() . '/..' . sprintf('%s/%s.svg', rtrim($this->svgPath()), $name_sage);
+
             return $this->svgCache[$name] = $this->files->exists($path) ? $this->files->get($path) : $this->svgPath().' not found.';
         });
     }
